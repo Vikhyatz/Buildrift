@@ -9,7 +9,6 @@ export async function POST(request) {
 
     console.log(body);
 
-    console.log(process.env.URI);
 
     await connectDb();
 

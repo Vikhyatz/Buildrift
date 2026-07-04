@@ -9,24 +9,135 @@ import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 
+import { useSession } from "next-auth/react";
+import PageLoader from "@/components/ui/Loader";
+import { toast } from "react-toastify";
+
+import { signOut } from "next-auth/react";
+import { redirect } from "next/dist/server/api-utils";
+
 export default function SettingsPage() {
+  const { data: session, status, update } = useSession();
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  const [name, setName] = useState(null);
+  const [avatar, setAvatar] = useState(null);
+  const [sameUpdate, setSameUpdate] = useState(false);
+
+  // mock data load
+  // useEffect(() => {
+  //   async function load() {
+  //     const data = await api.getUser();
+  //     setUser(data);
+  //     setLoading(false);
+  //   }
+  //   load();
+  // }, []);
+
   useEffect(() => {
     async function load() {
-      const data = await api.getUser();
-      setUser(data);
-      setLoading(false);
+      if (status == "authenticated") {
+        setLoading(false)
+      }
     }
-    load();
-  }, []);
+    load()
+  }, [status])
 
-  const handleSave = () => {
-    setSaving(true);
-    setTimeout(() => setSaving(false), 800);
+
+  // use effect and handleInput function to handle the dynamic AVATAR generation
+  useEffect(() => {
+    setName(session.user.name)
+    let avtr = "";
+    session.user.name.split(" ").forEach(element => {
+      avtr = avtr + element.charAt(0)
+    })
+    setAvatar(avtr.toUpperCase())
+  }, [status])
+
+  const handleInput = (event) => {
+    setName(event.target.value)
+
+    let avtr = "";
+    event.target.value.split(" ").forEach(element => {
+      avtr = avtr + element.charAt(0)
+    })
+    setAvatar(avtr.toUpperCase())
+  }
+
+
+  const handleSave = async () => {
+
+    if (session.user.name != name) {
+      setSaving(true);
+
+      try {
+
+        const formData = new FormData();
+        formData.append("userID", session.user.id)
+        formData.append("updatedName", name)
+
+        const response = await fetch("/api/updateName/", {
+          method: 'POST',
+          body: JSON.stringify({
+            userId: session.user.id,
+            updatedName: name,
+          })
+        })
+
+        const data = await response.json();
+        console.log(data)
+
+        if(response.ok){
+          toast.success(data.message)
+        }
+
+        // notify the jwt token to update the name as well
+        await update({
+          name: data.newName
+        })
+
+      } catch (err) {
+        toast.error("not able to update user name")
+      }
+    } else {
+      // then the name is same as before
+      setSameUpdate(true)
+    }
+
+    setSaving(false)
+
   };
+
+  const handleDeleteAccount = async () => {
+    try{
+
+      const response = await fetch("/api/deleteAccount/", {
+        method: 'DELETE',
+        body: JSON.stringify({
+          userId: session.user.id
+        })
+      })
+      
+      const data = await response.json();
+      console.log(data)
+
+      if(response.ok){
+        toast.success("deleted User successfully")
+        await signOut({
+          callbackUrl: "/",
+        })
+
+      }
+
+    }catch(err){
+      console.log(err)
+      toast.error("not able to delete user, try again in some time")
+    }
+    
+  }
 
   if (loading) {
     return (
@@ -36,6 +147,9 @@ export default function SettingsPage() {
       </div>
     );
   }
+
+
+  if (status == "loading") return <PageLoader />
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -50,14 +164,14 @@ export default function SettingsPage() {
             <FiUser className="w-4 h-4" />
             <span>Profile</span>
           </button>
-          <button className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-secondary/50 hover:text-foreground font-medium text-sm transition-colors">
+          {/* <button className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-secondary/50 hover:text-foreground font-medium text-sm transition-colors">
             <FiGithub className="w-4 h-4" />
             <span>Integrations</span>
           </button>
           <button className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-secondary/50 hover:text-foreground font-medium text-sm transition-colors">
             <FiMonitor className="w-4 h-4" />
             <span>Preferences</span>
-          </button>
+          </button> */}
           <button className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-secondary/50 hover:text-foreground font-medium text-sm transition-colors mt-4">
             <FiBell className="w-4 h-4" />
             <span>Notifications</span>
@@ -72,25 +186,22 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center border border-border text-lg font-bold text-muted-foreground">
-                  {user?.avatar}
-                </div>
-                <Button variant="outline" size="sm">Change Avatar</Button>
-              </div>
 
-              <div className="grid gap-4 mt-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Display Name</label>
-                  <Input defaultValue={user?.name} />
+                <div className="grid gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Display Name</label>
+                    <Input value={name} onChange={handleInput} />
+                    <p className="text-sm font-small">{sameUpdate && "the name is the same as before what ya updatin xD"}</p>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Email Address</label>
-                  <Input type="email" defaultValue={user?.email} />
+
+                <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center border border-border text-lg font-bold text-muted-foreground">
+                  {avatar}
                 </div>
+
               </div>
             </CardContent>
             <CardFooter className="flex justify-between border-t border-border pt-6">
-              <p className="text-sm text-muted-foreground">Please use a valid email address.</p>
               <Button onClick={handleSave} isLoading={saving}>Save Changes</Button>
             </CardFooter>
           </Card>
@@ -129,7 +240,7 @@ export default function SettingsPage() {
                   <p className="font-medium text-destructive">Delete Account</p>
                   <p className="text-sm text-muted-foreground">Permanently remove your account and all projects.</p>
                 </div>
-                <Button variant="destructive" className="shrink-0">
+                <Button variant="destructive" className="shrink-0" onClick={handleDeleteAccount}>
                   <FiLogOut className="w-4 h-4 mr-2" />
                   Delete Account
                 </Button>

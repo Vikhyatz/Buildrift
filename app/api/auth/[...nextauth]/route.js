@@ -46,20 +46,29 @@ const handler = NextAuth({
   },
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      // Runs on sign in
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        token.name = user.name;
       }
+
+      // Runs when update() is called
+      if (trigger === "update") {
+        if (session?.name) {
+          token.name = session.name;
+        }
+      }
+
       return token;
     },
 
-    // add mongoose user ID and user role to the session as well
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id;
-        session.user.role = token.role;
+        session.user.name = token.name;
       }
+
       return session;
     },
   },

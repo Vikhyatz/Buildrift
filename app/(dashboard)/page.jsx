@@ -37,7 +37,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Overview</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Hello, {session.user.name} 😎🧑‍💻</h1>
         <Link href="/deployments/new">
           <Button>New Deployment</Button>
         </Link>

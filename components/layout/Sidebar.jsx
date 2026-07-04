@@ -9,6 +9,7 @@ import { IoIosLogOut } from "react-icons/io";
 import { signOut } from "next-auth/react";
 
 import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 
 const navItems = [
   { name: "Dashboard", href: "/", icon: FiHome },
@@ -18,14 +19,23 @@ const navItems = [
   { name: "Settings", href: "/settings", icon: FiSettings },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ name }) {
+
+  const [avatar, setAvatar] = useState(null)
+
+  useEffect(() => {
+    let avtr = "";
+    name.split(" ").forEach(element => {
+      avtr = avtr + element.charAt(0)
+    })
+    setAvatar(avtr.toUpperCase())
+  }, [])
+  
 
   
   
   const pathname = usePathname();
-  const {data: session, status} = useSession();
   
-  if(status == "loading") return "loading..."
 
   return (
     <aside className="w-64 border-r border-border bg-card flex-shrink-0 h-screen sticky top-0 flex flex-col hidden md:flex">
@@ -82,10 +92,10 @@ export default function Sidebar() {
       <div className="p-4 border-t border-border">
         <div className="flex items-center space-x-3 px-3 py-2">
           <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-sm font-semibold border border-border">
-            JD
+            {avatar}
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-medium text-foreground">{session.user.name.charAt(0).toUpperCase() + session.user.name.slice(1)}</span>
+            <span className="text-sm font-medium text-foreground">{name.charAt(0).toUpperCase() + name.slice(1)}</span>
           </div>
           <button onClick={signOut} className="ml-4 p-2 rounded-xl border-1 border-solid border-white">
             <IoIosLogOut />
