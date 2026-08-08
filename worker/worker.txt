@@ -1,0 +1,8 @@
+index.js
+run.js
+cloneRepo.js
+detectFramework.js
+buildProject.js
+saveArtifacts.js
+cleanup.js
+updateDeployment.js

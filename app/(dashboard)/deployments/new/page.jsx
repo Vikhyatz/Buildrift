@@ -8,18 +8,28 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { api } from "@/services/api";
 
+import { useForm } from "react-hook-form";
+import { useSession } from "next-auth/react";
+import { toast } from "react-toastify";
+
 export default function NewDeploymentPage() {
+
+
+  const { data: session, status } = useSession()
+  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+
+
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [envVars, setEnvVars] = useState([{ key: "", value: "" }]);
   
-  const [formData, setFormData] = useState({
-    repository: "",
-    projectName: "",
-    branch: "main",
-    buildCommand: "npm run build",
-    outputDir: ".next",
-  });
+  // const [formData, setFormData] = useState({
+  //   repository: "",
+  //   projectName: "",
+  //   branch: "main",
+  //   buildCommand: "npm run build",
+  //   outputDir: ".next",
+  // });
 
   const handleAddEnv = () => {
     setEnvVars([...envVars, { key: "", value: "" }]);
@@ -35,17 +45,40 @@ export default function NewDeploymentPage() {
     setEnvVars(newVars);
   };
 
-  const handleDeploy = async (e) => {
-    e.preventDefault();
-    if (!formData.repository || !formData.projectName) return;
+  const handleDeploy = async (d) => {
+    // e.preventDefault();
+    const updatedData = {
+      ...d,
+      envVars,
+      creatorId: session?.user?.id
+    };
+
+    console.log(updatedData)
+    // if (!formData.repository || !formData.projectName) return;
     
-    setLoading(true);
-    try {
-      const deployment = await api.createDeployment(formData);
-      router.push(`/deployments/${deployment.id}`);
-    } catch (error) {
-      console.error(error);
-      setLoading(false);
+    // setLoading(true);
+    // try {
+    //   const deployment = await api.createDeployment(formData);
+    //   router.push(`/deployments/${deployment.id}`);
+    // } catch (error) {
+    //   console.error(error);
+    //   setLoading(false);
+    // }
+
+    try{
+      const response = await fetch("/api/createDeployment/", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedData),
+      })
+      const data = await response.json();
+      console.log(data)
+      
+      if(response.ok){
+        toast.success("deployment created successfully")
+      }
+    }catch(err){
+      toast.error("not able to create deployment")
     }
   };
 
@@ -56,7 +89,7 @@ export default function NewDeploymentPage() {
         <p className="text-muted-foreground mt-1">Import your existing repository or create a new one.</p>
       </div>
 
-      <form onSubmit={handleDeploy} className="space-y-6">
+      <form onSubmit={handleSubmit(handleDeploy)} className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -69,9 +102,8 @@ export default function NewDeploymentPage() {
             <div className="space-y-2">
               <label className="text-sm font-medium">Repository URL</label>
               <Input 
-                placeholder="https://github.com/username/repo" 
-                value={formData.repository}
-                onChange={e => setFormData({...formData, repository: e.target.value})}
+                {...register("repository", { required: true })}
+                placeholder="https://github.com/username/repo"
                 required
               />
             </div>
@@ -80,18 +112,17 @@ export default function NewDeploymentPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Project Name</label>
                 <Input 
+                  {...register("projectName", { required: true })}
                   placeholder="my-awesome-app" 
-                  value={formData.projectName}
-                  onChange={e => setFormData({...formData, projectName: e.target.value})}
                   required
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Branch</label>
                 <Input 
+                  {...register("branch", { required: true })}
                   placeholder="main" 
-                  value={formData.branch}
-                  onChange={e => setFormData({...formData, branch: e.target.value})}
+                  
                 />
               </div>
             </div>
@@ -108,18 +139,17 @@ export default function NewDeploymentPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Build Command</label>
-              <Input 
+              <Input
+                {...register("build", { required: true })} 
                 placeholder="npm run build" 
-                value={formData.buildCommand}
-                onChange={e => setFormData({...formData, buildCommand: e.target.value})}
+                
               />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Output Directory</label>
               <Input 
-                placeholder=".next" 
-                value={formData.outputDir}
-                onChange={e => setFormData({...formData, outputDir: e.target.value})}
+                {...register("output", { required: true })}
+                placeholder=".next"
               />
             </div>
           </CardContent>

@@ -1,0 +1,1 @@
+// code to check which framework it is and programatically choose what the build folder is going to be

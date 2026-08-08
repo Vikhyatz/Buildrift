@@ -10,6 +10,7 @@ import Link from "next/link";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 import { useSession } from "next-auth/react";
+import PageLoader from "@/components/ui/Loader";
 
 export default function DashboardPage() {
 
@@ -32,7 +33,7 @@ export default function DashboardPage() {
   }, []);
 
 
-  if (status == "loading") return "Loading..."
+  // if (status == "loading") return <PageLoader />
 
   return (
     <div className="space-y-8">
