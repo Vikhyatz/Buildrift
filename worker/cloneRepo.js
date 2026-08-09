@@ -7,7 +7,7 @@ const cloneRepo = async (projectPath, repoUrl) => {
         repoUrl,
         `${projectPath}`
     ]);
-    console.log("Repository cloned!");
+    
 }
 
 export default cloneRepo;

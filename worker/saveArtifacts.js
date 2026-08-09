@@ -2,12 +2,12 @@
 
 import fs from "fs/promises"
 
-const saveArtifacts = async (projectPath, uniqueID) => {
+const saveArtifacts = async (projectPath, uniqueID, outputDir) => {
     await fs.mkdir(`./alldists/${uniqueID}`, { recursive: true })
     console.log("created directory for distribution storage")
 
     await fs.cp(
-        `${projectPath}/dist`,
+        `${projectPath}/${outputDir}`,
         `./alldists/${uniqueID}`,
         {
             recursive: true

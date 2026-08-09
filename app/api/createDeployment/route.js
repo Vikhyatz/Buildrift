@@ -32,10 +32,11 @@ export async function POST(request) {
         
         
         // push new deployment to redis queue (the server is waiting for new deployment)
-        // await client.lPush("deployments", JSON.stringify({
-        //     id: newDeployment._id,
-        //     repoUrl: repository,
-        // }))
+        await client.lPush("deployments", JSON.stringify({
+            id: newDeployment._id,
+            repoUrl: repository,
+            outputDir: output
+        }))
 
         return new Response(JSON.stringify({ message: "created deployment successfully" }), { status: 200 })
 

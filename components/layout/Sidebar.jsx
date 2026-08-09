@@ -97,7 +97,7 @@ export default function Sidebar({ name }) {
           <div className="flex flex-col">
             <span className="text-sm font-medium text-foreground">{name.charAt(0).toUpperCase() + name.slice(1)}</span>
           </div>
-          <button onClick={signOut} className="ml-4 p-2 rounded-xl border-1 border-solid border-white">
+          <button onClick={signOut} className=" cursor-pointer ml-4 p-2 rounded-xl border-1 border-solid border-white">
             <IoIosLogOut />
           </button>
         </div>

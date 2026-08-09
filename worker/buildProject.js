@@ -3,6 +3,7 @@
 import run from "./run.js";
 
 const buildProject = async (projectPath) => {
+    console.log("installing packages and build...")
     await run("docker", [
         "run",
         "--rm",
