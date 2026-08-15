@@ -72,7 +72,10 @@ export default function NewDeploymentPage() {
         body: JSON.stringify(updatedData),
       })
       const data = await response.json();
-      console.log(data)
+      console.log(data.depId)
+
+      router.push(`/deployments/${data.depId}`);
+      // console.log("response result:", response)
       
       if(response.ok){
         toast.success("deployment created successfully")

@@ -20,6 +20,7 @@ export async function POST(request) {
     try {
         const { branch, build, output, projectName, repository, creatorId } = body
         
+        // add a new deployment
         const newDeployment = await Deployment.create({
             projectId: uuidv4(),
             projectName: projectName,
@@ -30,15 +31,19 @@ export async function POST(request) {
             creator: creatorId
         })
         
+        // append this new deployment in the users deployments
+        await User.findByIdAndUpdate(creatorId, {
+            $push: { deployments: newDeployment._id }
+        })
         
         // push new deployment to redis queue (the server is waiting for new deployment)
-        await client.lPush("deployments", JSON.stringify({
-            id: newDeployment._id,
-            repoUrl: repository,
-            outputDir: output
-        }))
+        // await client.lPush("deployments", JSON.stringify({
+        //     id: newDeployment._id,
+        //     repoUrl: repository,
+        //     outputDir: output
+        // }))
 
-        return new Response(JSON.stringify({ message: "created deployment successfully" }), { status: 200 })
+        return new Response(JSON.stringify({ message: "created deployment successfully", depId: newDeployment._id }), { status: 200 })
 
 
 

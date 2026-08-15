@@ -9,34 +9,62 @@ import { DeploymentTimeline } from "@/components/deployments/DeploymentTimeline"
 import { LogViewer } from "@/components/deployments/LogViewer";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { formatDistanceToNow } from "date-fns";
+import { useSession } from "next-auth/react";
+import { toast } from "react-toastify";
 
 export default function DeploymentDetailsPage(props) {
+
+  const { data: session, status } = useSession()
+  
+  
   const params = use(props.params);
   const [deployment, setDeployment] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  
   useEffect(() => {
     async function load() {
-      const data = await api.getDeployment(params.id);
-      setDeployment(data);
-      setLoading(false);
+      // check user and valid authorised deployment verification, and load the deployment data as well
       
-      // If deployment is active, poll for updates
-      if (data && (data.status === "Queued" || data.status === "Building" || data.status === "Uploading")) {
-        const interval = setInterval(async () => {
-          const updated = await api.getDeployment(params.id);
-          if (updated) {
-            setDeployment(updated);
-            if (updated.status === "Ready" || updated.status === "Failed") {
-              clearInterval(interval);
-            }
-          }
-        }, 3000);
-        return () => clearInterval(interval);
+      // const data = await api.getDeployment(params.id);
+      try{
+        console.log(session.user.id)
+        const response = await fetch(`/api/loadDeployment/?creatorId=${session.user.id}&deploymentId=${params.id}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        })
+        const data = await response.json();
+        console.log(data)
+
+        // console.log(response)
+        // if(response.ok){
+
+        //   setDeployment(data);
+        //   setLoading(false);
+        // }
+
+      }catch(err){
+        console.log("error occurred", err);
+        toast.error("not able to load deployment")
       }
+
+      // If deployment is active, poll for updates
+      // if (data && (data.status === "Queued" || data.status === "Building" || data.status === "Uploading")) {
+      //   const interval = setInterval(async () => {
+      //     const updated = await api.getDeployment(params.id);
+      //     if (updated) {
+      //       setDeployment(updated);
+      //       if (updated.status === "Ready" || updated.status === "Failed") {
+      //         clearInterval(interval);
+      //       }
+      //     }
+      //   }, 3000);
+      //   return () => clearInterval(interval);
+      // }
     }
-    load();
-  }, [params.id]);
+    if(params.id && session){
+      load();
+    }
+  }, [params.id, session]);
 
   if (loading) {
     return (
@@ -86,7 +114,7 @@ export default function DeploymentDetailsPage(props) {
                 <span>johndoe/{deployment.projectName}</span>
               </div>
             </div>
-            
+
             <div className="space-y-1">
               <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Commit</span>
               <div className="flex flex-col">
