@@ -35,6 +35,7 @@ export async function POST(request) {
         await User.findByIdAndUpdate(creatorId, {
             $push: { deployments: newDeployment._id }
         })
+        console.log("appended deployment")
         
         // push new deployment to redis queue (the server is waiting for new deployment)
         // await client.lPush("deployments", JSON.stringify({

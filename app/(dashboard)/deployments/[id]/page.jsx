@@ -20,6 +20,7 @@ export default function DeploymentDetailsPage(props) {
   const params = use(props.params);
   const [deployment, setDeployment] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [unauthorized, setUnauthorized] = useState(false)
   
   useEffect(() => {
     async function load() {
@@ -27,24 +28,33 @@ export default function DeploymentDetailsPage(props) {
       
       // const data = await api.getDeployment(params.id);
       try{
-        console.log(session.user.id)
         const response = await fetch(`/api/loadDeployment/?creatorId=${session.user.id}&deploymentId=${params.id}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         })
         const data = await response.json();
-        console.log(data)
-
-        // console.log(response)
+        
+        // TODO: fix this response and the names for the UI 
+        
         // if(response.ok){
-
         //   setDeployment(data);
         //   setLoading(false);
         // }
 
+        if (response.status == 401){
+          // toast.error("you're not authorized to load this deployment...")
+          setLoading(false);
+          setUnauthorized(true)
+        }
+
+        if (response.status == 500){
+          // toast.error("you're not authorized to load this deployment...")
+          setLoading(false);
+        }
+
       }catch(err){
-        console.log("error occurred", err);
         toast.error("not able to load deployment")
+        setLoading(false)
       }
 
       // If deployment is active, poll for updates
@@ -76,6 +86,14 @@ export default function DeploymentDetailsPage(props) {
     );
   }
 
+  if(unauthorized) {
+    return (
+      <div className="py-12 text-center border border-border border-dashed rounded-xl bg-card">
+        <p className="text-muted-foreground">you don't have the authority to monitor this deployment.</p>
+      </div>
+    )
+  }
+
   if (!deployment) {
     return (
       <div className="py-12 text-center border border-border border-dashed rounded-xl bg-card">
@@ -83,6 +101,7 @@ export default function DeploymentDetailsPage(props) {
       </div>
     );
   }
+
 
   return (
     <div className="space-y-6">
