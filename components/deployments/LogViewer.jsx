@@ -25,6 +25,7 @@ export function LogViewer({status }) {
   const [copied, setCopied] = useState(false);
   const bottomRef = useRef();
 
+
   // Simulate streaming logs
   useEffect(() => {
     if (status === "Queued") {
@@ -32,18 +33,40 @@ export function LogViewer({status }) {
       return;
     }
 
-    let currentIndex = 0;
-    const interval = setInterval(() => {
-      if (currentIndex < mockLogs.length) {
-        setLogs((prev) => [...prev, mockLogs[currentIndex]]);
-        currentIndex++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 500); // add a log every 500ms
 
-    return () => clearInterval(interval);
-  }, [status]);
+    // code for SSE
+    const eventSource = new EventSource("/api/emitLogs")
+
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data)
+      console.log("a message just came from the server bro: ", data)
+      // setLogs((prev) => [...prev, data])
+    }
+
+    // eventSource.onerror = (err) => {
+    //   console.log("SSE error: ", err)
+    //   eventSource.close();
+    // }
+
+    return () => {
+      eventSource.close()
+    }
+    
+
+
+
+    // let currentIndex = 0;
+    // const interval = setInterval(() => {
+    //   if (currentIndex < mockLogs.length) {
+    //     setLogs((prev) => [...prev, mockLogs[currentIndex]]);
+    //     currentIndex++;
+    //   } else {
+    //     clearInterval(interval);
+    //   }
+    // }, 500); // add a log every 500ms
+
+    // return () => clearInterval(interval);
+  }, []);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -79,12 +102,13 @@ export function LogViewer({status }) {
           
           <div key={i} className="mb-1">
             <span className="text-muted-foreground mr-3">{String(i + 1).padStart(3, "0")}</span>
-            <span className={
+            {/* <span className={
               log?.includes("[ERROR]") ? "text-destructive" :
               log?.includes("[SUCCESS]") ? "text-success" :
               log?.includes("npm") ? "text-primary/80" :
               "text-foreground/90"
-            }>
+            }> */}
+            <span className="text-foreground/90">
               {log}
             </span>
           </div>

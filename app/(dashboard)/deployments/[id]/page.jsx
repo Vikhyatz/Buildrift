@@ -36,10 +36,11 @@ export default function DeploymentDetailsPage(props) {
         
         // TODO: fix this response and the names for the UI 
         
-        // if(response.ok){
-        //   setDeployment(data);
-        //   setLoading(false);
-        // }
+        if(response.ok){
+          setDeployment(data.deployment);
+          setLoading(false);
+          console.log(data)
+        }
 
         if (response.status == 401){
           // toast.error("you're not authorized to load this deployment...")
@@ -73,6 +74,7 @@ export default function DeploymentDetailsPage(props) {
     }
     if(params.id && session){
       load();
+      console.log("this is deployment", deployment)
     }
   }, [params.id, session]);
 
@@ -108,9 +110,10 @@ export default function DeploymentDetailsPage(props) {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <h1 className="text-2xl font-bold tracking-tight">{deployment.projectName}</h1>
-          <StatusBadge status={deployment.status} />
+          {/* <StatusBadge status={deployment.status} /> */}
         </div>
-        {deployment.url && deployment.status === "Ready" && (
+        {/* TODO: status of deployment to be fixed in the DB, updated to the DB and rendered in the UI */}
+        {/* {deployment.url && deployment.status === "Ready" && (
           <a
             href={`https://${deployment.url}`}
             target="_blank"
@@ -120,7 +123,7 @@ export default function DeploymentDetailsPage(props) {
             <span>Visit Application</span>
             <FiExternalLink className="w-4 h-4" />
           </a>
-        )}
+        )} */}
       </div>
 
       <Card>
@@ -140,9 +143,6 @@ export default function DeploymentDetailsPage(props) {
                 <div className="flex items-center space-x-2 text-sm font-medium">
                   <FiGitBranch className="w-4 h-4" />
                   <span>{deployment.branch}</span>
-                  <span className="text-muted-foreground">•</span>
-                  <FiGitCommit className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-mono text-xs">{deployment.commitSha.substring(0, 7)}</span>
                 </div>
                 <span className="text-xs text-muted-foreground mt-1 truncate">{deployment.commitMessage}</span>
               </div>
@@ -159,7 +159,7 @@ export default function DeploymentDetailsPage(props) {
             <div className="space-y-1">
               <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Deployment ID</span>
               <div className="flex items-center text-sm font-medium font-mono text-muted-foreground">
-                {deployment.id}
+                {deployment.projectId}
               </div>
             </div>
           </div>

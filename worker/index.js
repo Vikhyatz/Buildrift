@@ -34,20 +34,20 @@ const worker = async () => {
                 await cloneRepo(projectPath, element.repoUrl);
                 await publishLog("Repository cloned!");
                 
-                //// detectFramework();
+                // detectFramework();
 
                 await publishLog("installing packages and build...");                
                 await buildProject(projectPath);
                 await publishLog("build completed!!");
 
-                await publishLog("created directory for distribution storage");
-                await saveArtifacts(projectPath, uniqueID, element.outputDir);
-                await publishLog("moved dist from clone to bucket");
+                // await publishLog("created directory for distribution storage");
+                // await saveArtifacts(projectPath, uniqueID, element.outputDir);
+                // await publishLog("moved dist from clone to bucket");
 
                 await cleanup(projectPath);
                 await publishLog("delete the project files and the container");
 
-                //// updateDeployment():
+                // updateDeployment():
             } catch (err) {
                 console.log("error processing the deployment", err)
             }
