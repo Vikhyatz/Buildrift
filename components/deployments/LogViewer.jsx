@@ -28,45 +28,42 @@ export function LogViewer({status }) {
 
   // Simulate streaming logs
   useEffect(() => {
-    if (status === "Queued") {
-      setLogs(["[INFO] Waiting for runner..."]);
-      return;
-    }
 
+    const eventSource = new EventSource(
+        "/api/emitLogs"
+    );
 
-    // code for SSE
-    const eventSource = new EventSource("/api/emitLogs")
+    eventSource.onopen = () => {
+        console.log("SSE connection opened");
+    };
 
     eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-      console.log("a message just came from the server bro: ", data)
-      // setLogs((prev) => [...prev, data])
-    }
 
-    // eventSource.onerror = (err) => {
-    //   console.log("SSE error: ", err)
-    //   eventSource.close();
-    // }
+        const data = JSON.parse(event.data);
+
+        console.log(
+            "Message received by browser:",
+            data
+        );
+
+        if (data.type === "LOG") {
+            setLogs((prev) => [
+                ...prev,
+                data.message
+            ]);
+        }
+    };
+
+    eventSource.onerror = (error) => {
+        console.log("SSE error:", error);
+    };
 
     return () => {
-      eventSource.close()
-    }
-    
+        console.log("Closing SSE");
+        eventSource.close();
+    };
 
-
-
-    // let currentIndex = 0;
-    // const interval = setInterval(() => {
-    //   if (currentIndex < mockLogs.length) {
-    //     setLogs((prev) => [...prev, mockLogs[currentIndex]]);
-    //     currentIndex++;
-    //   } else {
-    //     clearInterval(interval);
-    //   }
-    // }, 500); // add a log every 500ms
-
-    // return () => clearInterval(interval);
-  }, []);
+}, []);
 
   // Auto-scroll to bottom
   useEffect(() => {

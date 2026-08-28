@@ -1,65 +1,86 @@
-import { eventEmitter } from "@/lib/logs";
+import { createClient } from "redis";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const encoder = new TextEncoder();
+    const encoder = new TextEncoder();
 
-  const stream = new ReadableStream({
-    start(controller) {
+    const subscriber = createClient({
+        url: process.env.REDIS_URL,
+    });
 
-      const send = (data) => {
-        try {
-          controller.enqueue(
-            encoder.encode(
-              `data: ${JSON.stringify(data)}\n\n`
-            )
-          );
-        } catch (error) {
-          console.error("Failed to send SSE:", error);
+    subscriber.on("error", (err) => {
+        console.error("Redis subscriber error:", err);
+    });
+
+    await subscriber.connect();
+
+    console.log("SSE Redis subscriber connected");
+
+    const stream = new ReadableStream({
+        async start(controller) {
+
+            const send = (data) => {
+                try {
+                    controller.enqueue(
+                        encoder.encode(
+                            `data: ${JSON.stringify(data)}\n\n`
+                        )
+                    );
+                } catch (error) {
+                    console.error("SSE send error:", error);
+                }
+            };
+
+            // Immediately tell browser that SSE is alive
+            send({
+                type: "connected"
+            });
+
+            await subscriber.subscribe(
+                "deployments-events",
+                (message) => {
+
+                    console.log(
+                        "Message received from Redis:",
+                        message
+                    );
+
+                    const event = JSON.parse(message);
+
+                    send(event);
+                }
+            );
+
+            console.log("SSE subscribed to deployment-events");
+        },
+
+        async cancel() {
+
+            console.log("SSE connection closed");
+
+            try {
+                await subscriber.unsubscribe(
+                    "deployments-events"
+                );
+
+                await subscriber.quit();
+            } catch (error) {
+                console.error(
+                    "Redis cleanup error:",
+                    error
+                );
+            }
         }
-      };
+    });
 
-      // IMPORTANT: receive the event data
-      const listener = (data) => {
-        console.log("Sending SSE event:", data);
-        send(data);
-      };
-
-      eventEmitter.on("message", listener);
-
-      // Tell browser connection succeeded
-      send({
-        type: "connected"
-      });
-
-      // Keep connection alive
-      const heartbeat = setInterval(() => {
-        try {
-          controller.enqueue(
-            encoder.encode(": heartbeat\n\n")
-          );
-        } catch {
-          clearInterval(heartbeat);
-        }
-      }, 15000);
-
-      // Store cleanup somewhere we can access it
-      this.cleanup = () => {
-        clearInterval(heartbeat);
-        eventEmitter.off("message", listener);
-      };
-    },
-
-    cancel() {
-      // The client disconnected.
-      // Cleanup is handled below if needed.
-    }
-  });
-
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache, no-transform",
-      "Connection": "keep-alive",
-    },
-  });
+    return new Response(stream, {
+        headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache, no-transform",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    });
 }
