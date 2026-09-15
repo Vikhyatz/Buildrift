@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 const navItems = [
   { name: "Dashboard", href: "/", icon: FiHome },
   { name: "Deployments", href: "/deployments", icon: FiBox },
-  { name: "Projects", href: "/projects", icon: FiGrid },
+  // { name: "Projects", href: "/projects", icon: FiGrid },
   { name: "Activity", href: "/activity", icon: FiActivity },
   { name: "Settings", href: "/settings", icon: FiSettings },
 ];

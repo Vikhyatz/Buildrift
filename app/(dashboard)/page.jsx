@@ -17,20 +17,23 @@ export default function DashboardPage() {
   const { data: session, status } = useSession();
 
   console.log(session)
-
-  
   
   const [deployments, setDeployments] = useState([]);
   const [loading, setLoading] = useState(true);
   
+  
   useEffect(() => {
     async function loadData() {
-      const data = await api.getDeployments();
-      setDeployments(data);
+      const response = await fetch(`/api/fetchDeployment/?id=${session.user.id}`)
+      const data = await response.json();
+      setDeployments(data.deployments);
       setLoading(false);
     }
-    loadData();
-  }, []);
+    if(session){
+      loadData();
+    }
+  }, [session]);
+
 
 
   // if (status == "loading") return <PageLoader />
@@ -87,7 +90,7 @@ export default function DashboardPage() {
         ) : deployments.length > 0 ? (
           <div className="grid gap-4">
             {deployments.slice(0, 5).map(dep => (
-              <DeploymentCard key={dep.id} deployment={dep} />
+              <DeploymentCard key={dep._id} deployment={dep} name={session.user.name} />
             ))}
           </div>
         ) : (
