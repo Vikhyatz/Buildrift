@@ -28,7 +28,8 @@ export async function POST(request) {
             branch: branch,
             buildCommand: build,
             outputDirectory: output,
-            creator: creatorId
+            creator: creatorId,
+            status: 'Queued'
         })
         
         // append this new deployment in the users deployments

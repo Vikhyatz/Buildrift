@@ -15,64 +15,83 @@ import { toast } from "react-toastify";
 export default function DeploymentDetailsPage(props) {
 
   const { data: session, status } = useSession()
-  
-  
+
+
   const params = use(props.params);
+  const [deploymentStatus, setDeploymentStatus] = useState("Queued")
   const [deployment, setDeployment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [unauthorized, setUnauthorized] = useState(false)
-  
+
+  // AFTER THE LOADING IS DONE, WE CONNECT TO THE SERVER SENT EVENTS AND UPDATE THE STATUS VALUE ACCORDING TO THE EVENT
+
+  // streaming status, connecting to the same emitter and differencing using the event type ( status )
+  useEffect(() => {
+    const eventSource = new EventSource("/api/emitLogs");
+
+    eventSource.onopen = () => {
+      console.log("SSE connection opened");
+    };
+
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      console.log("Message received by browser:", data);
+
+      if (data.type === "LOG" && (data.message.includes("Queued") || data.message.includes("Building") || data.message.includes("Uploading") || data.message.includes("Ready"))) {
+        console.log(data.message)
+        setDeploymentStatus(data.message)
+      }
+    };
+
+    eventSource.onerror = (error) => {
+      console.log("SSE error:", error);
+    };
+
+    return () => {
+      console.log("Closing SSE");
+      eventSource.close();
+    };
+
+  }, []);
+
   useEffect(() => {
     async function load() {
       // check user and valid authorised deployment verification, and load the deployment data as well
-      
+
       // const data = await api.getDeployment(params.id);
-      try{
+      try {
         const response = await fetch(`/api/loadDeployment/?creatorId=${session.user.id}&deploymentId=${params.id}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         })
         const data = await response.json();
-        
+
         // TODO: fix this response and the names for the UI 
-        
-        if(response.ok){
+
+        if (response.ok) {
           setDeployment(data.deployment);
           setLoading(false);
           console.log(data)
         }
 
-        if (response.status == 401){
-          // toast.error("you're not authorized to load this deployment...")
+        if (response.status == 401) {
+          toast.error("you're not authorized to load this deployment...")
           setLoading(false);
           setUnauthorized(true)
         }
 
-        if (response.status == 500){
-          // toast.error("you're not authorized to load this deployment...")
+        if (response.status == 500) {
+          toast.error("you're not authorized to load this deployment...")
           setLoading(false);
         }
 
-      }catch(err){
+      } catch (err) {
         toast.error("not able to load deployment")
         setLoading(false)
       }
-
-      // If deployment is active, poll for updates
-      // if (data && (data.status === "Queued" || data.status === "Building" || data.status === "Uploading")) {
-      //   const interval = setInterval(async () => {
-      //     const updated = await api.getDeployment(params.id);
-      //     if (updated) {
-      //       setDeployment(updated);
-      //       if (updated.status === "Ready" || updated.status === "Failed") {
-      //         clearInterval(interval);
-      //       }
-      //     }
-      //   }, 3000);
-      //   return () => clearInterval(interval);
-      // }
     }
-    if(params.id && session){
+    if (params.id && session) {
       load();
       console.log("this is deployment", deployment)
     }
@@ -88,7 +107,7 @@ export default function DeploymentDetailsPage(props) {
     );
   }
 
-  if(unauthorized) {
+  if (unauthorized) {
     return (
       <div className="py-12 text-center border border-border border-dashed rounded-xl bg-card">
         <p className="text-muted-foreground">you don't have the authority to monitor this deployment.</p>
@@ -110,7 +129,7 @@ export default function DeploymentDetailsPage(props) {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <h1 className="text-2xl font-bold tracking-tight">{deployment.projectName}</h1>
-          {/* <StatusBadge status={deployment.status} /> */}
+          <StatusBadge status={deploymentStatus} />
         </div>
         {/* TODO: status of deployment to be fixed in the DB, updated to the DB and rendered in the UI */}
         {/* {deployment.url && deployment.status === "Ready" && (
@@ -133,7 +152,7 @@ export default function DeploymentDetailsPage(props) {
               <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Repository</span>
               <div className="flex items-center space-x-2 text-sm font-medium">
                 <FiGithub className="w-4 h-4" />
-                <span>johndoe/{deployment.projectName}</span>
+                <a href={deployment.repoUrl} className="truncate max-w-40">{deployment.repoUrl}</a>
               </div>
             </div>
 
@@ -171,7 +190,7 @@ export default function DeploymentDetailsPage(props) {
           <CardTitle className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">Status</CardTitle>
         </CardHeader>
         <CardContent>
-          <DeploymentTimeline status={deployment.status} />
+          <DeploymentTimeline status={deploymentStatus} />
         </CardContent>
       </Card>
 

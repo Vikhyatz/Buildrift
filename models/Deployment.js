@@ -9,7 +9,7 @@ const deploymentSchema = mongoose.Schema({
     buildCommand: {type: String, required: true},
     outputDirectory: {type: String, required: true},
     
-    // status: {type: String, required: true},
+    status: {type: String, required: true},
     // commitSha: {type: String, required: true},
     // commitMessage: {type: String, required: true},
     // duration: {type: String, required: true},

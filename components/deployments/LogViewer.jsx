@@ -20,50 +20,50 @@ const mockLogs = [
   "[SUCCESS] Deployment ready."
 ];
 
-export function LogViewer({status }) {
+export function LogViewer({ status }) {
   const [logs, setLogs] = useState([]);
   const [copied, setCopied] = useState(false);
   const bottomRef = useRef();
 
 
-  // Simulate streaming logs
+  // streaming logs
   useEffect(() => {
 
     const eventSource = new EventSource(
-        "/api/emitLogs"
+      "/api/emitLogs"
     );
 
     eventSource.onopen = () => {
-        console.log("SSE connection opened");
+      console.log("SSE connection opened");
     };
 
     eventSource.onmessage = (event) => {
 
-        const data = JSON.parse(event.data);
+      const data = JSON.parse(event.data);
 
-        console.log(
-            "Message received by browser:",
-            data
-        );
+      console.log(
+        "Message received by browser:",
+        data
+      );
 
-        if (data.type === "LOG") {
-            setLogs((prev) => [
-                ...prev,
-                data.message
-            ]);
-        }
+      if (data.type === "LOG") {
+        setLogs((prev) => [
+          ...prev,
+          data.message
+        ]);
+      }
     };
 
     eventSource.onerror = (error) => {
-        console.log("SSE error:", error);
+      console.log("SSE error:", error);
     };
 
     return () => {
-        console.log("Closing SSE");
-        eventSource.close();
+      console.log("Closing SSE");
+      eventSource.close();
     };
 
-}, []);
+  }, []);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -85,7 +85,7 @@ export function LogViewer({status }) {
           <div className="w-3 h-3 rounded-full bg-success" />
           <span className="ml-2 text-xs font-mono text-muted-foreground">Build Logs</span>
         </div>
-        <button 
+        <button
           onClick={copyLogs}
           className="text-muted-foreground hover:text-foreground transition-colors"
           title="Copy logs"
@@ -93,19 +93,18 @@ export function LogViewer({status }) {
           {copied ? <FiCheck className="w-4 h-4 text-success" /> : <FiCopy className="w-4 h-4" />}
         </button>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto p-4 font-mono text-xs sm:text-sm leading-relaxed">
         {logs.map((log, i) => (
-          
+
           <div key={i} className="mb-1">
             <span className="text-muted-foreground mr-3">{String(i + 1).padStart(3, "0")}</span>
-            {/* <span className={
+            <span className={
               log?.includes("[ERROR]") ? "text-destructive" :
               log?.includes("[SUCCESS]") ? "text-success" :
               log?.includes("npm") ? "text-primary/80" :
               "text-foreground/90"
-            }> */}
-            <span className="text-foreground/90">
+            }>
               {log}
             </span>
           </div>
