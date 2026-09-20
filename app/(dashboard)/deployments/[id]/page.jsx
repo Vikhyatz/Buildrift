@@ -39,6 +39,7 @@ export default function DeploymentDetailsPage(props) {
       console.log("Message received by browser:", data);
 
       if (data.type === "LOG" && (data.message.includes("Queued") || data.message.includes("Building") || data.message.includes("Uploading") || data.message.includes("Ready"))) {
+        // after getting the status update, update the deploymentStatus state.
         console.log(data.message)
         setDeploymentStatus(data.message)
       }
@@ -196,7 +197,7 @@ export default function DeploymentDetailsPage(props) {
 
       <div className="space-y-2">
         <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground px-1">Build Logs</h3>
-        <LogViewer status={deployment.status} />
+        <LogViewer status={deploymentStatus} depId={deployment._id}/>
       </div>
     </div>
   );

@@ -75,9 +75,9 @@ export default function SettingsPage() {
 
       try {
 
-        const formData = new FormData();
-        formData.append("userID", session.user.id)
-        formData.append("updatedName", name)
+        // const formData = new FormData();
+        // formData.append("userID", session.user.id)
+        // formData.append("updatedName", name)
 
         const response = await fetch("/api/updateName/", {
           method: 'POST',

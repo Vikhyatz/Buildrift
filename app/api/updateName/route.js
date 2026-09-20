@@ -1,6 +1,7 @@
 import connectDb from "../../ConnectDb";
-import bcrypt from 'bcryptjs'
-import User from "@/models/User";
+// import bcrypt from 'bcryptjs'
+// import User from "@/models/User";
+import Deployment from "@/models/Deployment";
 
 
 
@@ -11,11 +12,11 @@ export async function POST(request) {
 
     console.log(body);
 
-    const userId = body.userId;
-    const updatedName = body.updatedName
+    const status = body.status;
+    const logs = body.logs
 
     try{
-        const updateName = await User.findByIdAndUpdate(
+        const updateDeployment = await Deployment.findByIdAndUpdate(
             userId,
             {name: updatedName}
         )

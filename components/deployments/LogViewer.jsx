@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { FiCopy, FiCheck } from "react-icons/fi";
+import { toast } from "react-toastify";
 
 
 
@@ -20,10 +21,32 @@ const mockLogs = [
   "[SUCCESS] Deployment ready."
 ];
 
-export function LogViewer({ status }) {
+export function LogViewer({ status , depId}) {
   const [logs, setLogs] = useState([]);
   const [copied, setCopied] = useState(false);
   const bottomRef = useRef();
+
+
+  const updateDeployment = async (status, logsArr, depId) => {
+    try {
+      const response = await fetch("/api/updateDeployment", {
+        method: 'POST',
+        body: JSON.stringify({
+          logs: logsArr,
+          status: status,
+          depId: depId
+        })
+      })
+      const data = response.json();
+      console.log(data)
+      if(response.ok){
+        toast.success(`logs and state saved, status: ${status}`)
+      }
+
+    } catch (err) {
+      console.log(error)
+    }
+  }
 
 
   // streaming logs
@@ -47,10 +70,22 @@ export function LogViewer({ status }) {
       );
 
       if (data.type === "LOG") {
-        setLogs((prev) => [
-          ...prev,
-          data.message
-        ]);
+        setLogs((prevLogs) => {
+          const nextLogs = [...prevLogs, data.message];
+          
+          const isStatusUpdate =
+            data.message.includes("Queued") ||
+            data.message.includes("Building") ||
+            data.message.includes("Uploading") ||
+            data.message.includes("Ready");
+
+          if (isStatusUpdate) {
+            // Pass the newly updated logs array, rather than the stale state value.
+            updateDeployment(status, nextLogs, depId);
+          }
+
+          return nextLogs;
+        });
       }
     };
 
@@ -101,9 +136,9 @@ export function LogViewer({ status }) {
             <span className="text-muted-foreground mr-3">{String(i + 1).padStart(3, "0")}</span>
             <span className={
               log?.includes("[ERROR]") ? "text-destructive" :
-              log?.includes("[SUCCESS]") ? "text-success" :
-              log?.includes("npm") ? "text-primary/80" :
-              "text-foreground/90"
+                log?.includes("[SUCCESS]") ? "text-success" :
+                  log?.includes("npm") ? "text-primary/80" :
+                    "text-foreground/90"
             }>
               {log}
             </span>

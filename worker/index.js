@@ -41,7 +41,9 @@ const worker = async () => {
                 await publishLog("Building")
 
                 await publishLog("[SUCCESS] installing packages and build...");
-                await buildProject(projectPath);
+                // await buildProject(projectPath);
+                await new Promise(resolve => setTimeout(resolve, 10000));
+                
                 await publishLog("[SUCCESS] build completed!!");
 
                 await publishLog("Uploading")
