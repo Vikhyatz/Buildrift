@@ -29,7 +29,7 @@ export function ProjectCard({ project, name }) {
               <span className="font-bold text-sm">{avatar}</span>
             </div>
             <div>
-              <Link href={`/projects/${project._id}`} className="font-semibold text-lg hover:underline decoration-primary underline-offset-4 line-clamp-1">
+              <Link href={`/deployments/${project._id}`} className="font-semibold text-lg hover:underline decoration-primary underline-offset-4 line-clamp-1">
                 {project.projectName}
               </Link>
               <div className="flex items-center text-xs text-muted-foreground mt-0.5 space-x-1 hover:text-foreground transition-colors cursor-pointer ">

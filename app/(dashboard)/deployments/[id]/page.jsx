@@ -18,10 +18,11 @@ export default function DeploymentDetailsPage(props) {
 
 
   const params = use(props.params);
-  const [deploymentStatus, setDeploymentStatus] = useState("Queued")
+  const [deploymentStatus, setDeploymentStatus] = useState("")
   const [deployment, setDeployment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [unauthorized, setUnauthorized] = useState(false)
+  const [prevLogs, setPrevLogs] = useState()
 
   // AFTER THE LOADING IS DONE, WE CONNECT TO THE SERVER SENT EVENTS AND UPDATE THE STATUS VALUE ACCORDING TO THE EVENT
 
@@ -72,6 +73,8 @@ export default function DeploymentDetailsPage(props) {
 
         if (response.ok) {
           setDeployment(data.deployment);
+          setDeploymentStatus(data.deployment.status)
+          setPrevLogs(data.deployment.logs)
           setLoading(false);
           console.log(data)
         }
@@ -197,7 +200,7 @@ export default function DeploymentDetailsPage(props) {
 
       <div className="space-y-2">
         <h3 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground px-1">Build Logs</h3>
-        <LogViewer status={deploymentStatus} depId={deployment._id}/>
+        <LogViewer status={deploymentStatus} depId={deployment._id} prevLogs={prevLogs}/>
       </div>
     </div>
   );

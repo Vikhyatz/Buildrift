@@ -1,8 +1,7 @@
 import connectDb from "../../ConnectDb";
 import bcrypt from 'bcryptjs'
 import User from "@/models/User";
-
-
+import Deployment from "@/models/Deployment";
 
 export async function POST(request) {
     await connectDb();
@@ -11,18 +10,18 @@ export async function POST(request) {
 
     console.log(body);
 
-    const userId = body.userId;
-    const updatedName = body.updatedName
+    const logs = body.logs;
+    const status = body.status
     const depId = body.depId
 
     try {
-        // const updateName = await User.findByIdAndUpdate(
-        //     userId,
-        //     {name: updatedName}
-        // )
+        const updateDeployment = await Deployment.findByIdAndUpdate(
+            depId,
+            {status: status, logs: logs}
+        )
 
         // return new Response(JSON.stringify({ message: "updated user name", newName: updatedName}), {status: 200})
-        return new Response(JSON.stringify({ message: "updated deployment" }), { status: 200 })
+        return new Response(JSON.stringify({ message: "updated deployment", updateDeployment: updateDeployment }), { status: 200 })
 
     } catch (err) {
         console.log("not able to update user name ERR:  ", err);

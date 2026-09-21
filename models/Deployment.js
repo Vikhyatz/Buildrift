@@ -10,6 +10,8 @@ const deploymentSchema = mongoose.Schema({
     outputDirectory: {type: String, required: true},
     
     status: {type: String, required: true},
+    logs: {type: [String], default: []},
+    
     // commitSha: {type: String, required: true},
     // commitMessage: {type: String, required: true},
     // duration: {type: String, required: true},

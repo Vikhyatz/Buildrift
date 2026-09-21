@@ -6,23 +6,25 @@ import { toast } from "react-toastify";
 
 
 
-const mockLogs = [
-  "[INFO] Preparing deployment container...",
-  "[INFO] Cloning repository johndoe/my-portfolio...",
-  "[INFO] Found package.json, installing dependencies...",
-  "[INFO] > npm install",
-  "[INFO] added 120 packages, and audited 121 packages in 3s",
-  "[INFO] Running build command...",
-  "[INFO] > npm run build",
-  "[INFO] Next.js 14.x.x",
-  "[INFO] Creating an optimized production build...",
-  "[INFO] âœ“ Compiled successfully",
-  "[INFO] Uploading artifacts...",
-  "[SUCCESS] Deployment ready."
-];
+// const mockLogs = [
+//   "[INFO] Preparing deployment container...",
+//   "[INFO] Cloning repository johndoe/my-portfolio...",
+//   "[INFO] Found package.json, installing dependencies...",
+//   "[INFO] > npm install",
+//   "[INFO] added 120 packages, and audited 121 packages in 3s",
+//   "[INFO] Running build command...",
+//   "[INFO] > npm run build",
+//   "[INFO] Next.js 14.x.x",
+//   "[INFO] Creating an optimized production build...",
+//   "[INFO] âœ“ Compiled successfully",
+//   "[INFO] Uploading artifacts...",
+//   "[SUCCESS] Deployment ready."
+// ];
 
-export function LogViewer({ status , depId}) {
-  const [logs, setLogs] = useState([]);
+export function LogViewer({ status , depId, prevLogs}) {
+  const [logs, setLogs] = useState(() => (
+    Array.isArray(prevLogs) ? prevLogs : []
+  ));
   const [copied, setCopied] = useState(false);
   const bottomRef = useRef();
 
@@ -81,7 +83,7 @@ export function LogViewer({ status , depId}) {
 
           if (isStatusUpdate) {
             // Pass the newly updated logs array, rather than the stale state value.
-            updateDeployment(status, nextLogs, depId);
+            updateDeployment(data.message, nextLogs, depId);
           }
 
           return nextLogs;
