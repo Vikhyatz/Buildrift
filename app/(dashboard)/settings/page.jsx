@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 
 import { signOut } from "next-auth/react";
 import { redirect } from "next/dist/server/api-utils";
+import Link from "next/link";
 
 export default function SettingsPage() {
   const { data: session, status, update } = useSession();
@@ -172,10 +173,10 @@ export default function SettingsPage() {
             <FiMonitor className="w-4 h-4" />
             <span>Preferences</span>
           </button> */}
-          <button className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-secondary/50 hover:text-foreground font-medium text-sm transition-colors mt-4">
+          <Link href='/activity' className="flex items-center space-x-2 px-3 py-2 rounded-md text-muted-foreground hover:bg-secondary/50 hover:text-foreground font-medium text-sm transition-colors mt-4">
             <FiBell className="w-4 h-4" />
-            <span>Notifications</span>
-          </button>
+            <span>Activity</span>
+          </Link>
         </nav>
 
         <div className="space-y-6">

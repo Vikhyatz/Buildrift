@@ -27,7 +27,7 @@ export function DeploymentCard({ deployment, name }) {
               <Link href={`/deployments/${deployment._id}`} className="font-medium text-lg hover:underline decoration-primary underline-offset-4">
                 {deployment.projectName}
               </Link>
-              {/* <StatusBadge status={deployment.status} /> */}
+              <StatusBadge status={deployment.status} />
             </div>
 
             <div className="flex items-center text-sm text-muted-foreground space-x-3 mt-2">

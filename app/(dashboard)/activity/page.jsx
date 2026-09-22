@@ -7,6 +7,7 @@ import { api } from "@/services/api";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
+import { useSession } from "next-auth/react";
 
 const activityIcons = {
   deployment_success: { icon: FiCheckCircle, color: "text-success", bg: "bg-success/10", border: "border-success/20" },
@@ -16,17 +17,21 @@ const activityIcons = {
 };
 
 export default function ActivityPage() {
+  const {data: session, status} = useSession();
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function load() {
-      const data = await api.getActivity();
-      setActivities(data);
+    async function loadData() {
+      const response = await fetch(`/api/fetchActivity/?id=${session.user.id}`)
+      const data = await response.json();
+      setActivities(data.activity);
       setLoading(false);
     }
-    load();
-  }, []);
+    if(session){
+      loadData();
+    }
+  }, [session]);
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -56,7 +61,7 @@ export default function ActivityPage() {
                 const Icon = style.icon;
 
                 return (
-                  <div key={activity.id} className="relative pl-8">
+                  <div key={idx} className="relative pl-8">
                     {/* Timeline dot */}
                     <div className={cn(
                       "absolute -left-[17px] top-1 w-8 h-8 rounded-full border-2 bg-card flex items-center justify-center",
@@ -71,7 +76,7 @@ export default function ActivityPage() {
                       </p>
                       <div className="flex items-center text-xs text-muted-foreground space-x-2">
                         <span>{formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}</span>
-                        <span>â€¢</span>
+                        <span>•</span>
                         <span>{format(new Date(activity.timestamp), "MMM d, yyyy h:mm a")}</span>
                       </div>
                     </div>

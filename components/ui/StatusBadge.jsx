@@ -10,7 +10,7 @@ const statusStyles = {
 }
 
 export function StatusBadge({status, className, ...props }) {
-  const styles = statusStyles[status]
+  const styles = statusStyles[status] ?? statusStyles.Queued
 
   return (
     <div

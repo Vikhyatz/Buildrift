@@ -57,7 +57,7 @@ export function ProjectCard({ project, name }) {
               <span>{formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}</span>
             </div>
             <div className="flex items-center space-x-2">
-              {/* <StatusBadge status={project.lastDeploymentStatus} />
+              <StatusBadge status={project.status} />
               {project.lastDeploymentStatus === "Ready" && (
                 <a 
                   href={`https://${project.url}`} 
@@ -68,7 +68,7 @@ export function ProjectCard({ project, name }) {
                   <FiExternalLink className="w-3.5 h-3.5" />
                   <span className="truncate max-w-[120px]">{project.url}</span>
                 </a>
-              )} */}
+              )}
             </div>
           </div>
         </div>

@@ -8,13 +8,9 @@ const deploymentSchema = mongoose.Schema({
     branch: {type: String, required: true},
     buildCommand: {type: String, required: true},
     outputDirectory: {type: String, required: true},
-    
     status: {type: String, required: true},
     logs: {type: [String], default: []},
     
-    // commitSha: {type: String, required: true},
-    // commitMessage: {type: String, required: true},
-    // duration: {type: String, required: true},
     creator: {
         type: mongoose.Types.ObjectId,
         ref: "User"

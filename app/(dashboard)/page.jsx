@@ -52,7 +52,6 @@ export default function DashboardPage() {
           title="Total Deployments"
           value={deployments.length}
           icon={FiBox}
-          trend={{ value: 12, label: "from last month", isPositive: true }}
         />
         <StatsCard
           title="Active Deployments"
@@ -63,13 +62,11 @@ export default function DashboardPage() {
           title="Failed Deployments"
           value={deployments.filter(d => d.status === "Failed").length}
           icon={FiXCircle}
-          trend={{ value: 2, label: "from last week", isPositive: false }}
         />
         <StatsCard
           title="Successful Deployments"
           value={deployments.filter(d => d.status === "Ready").length}
           icon={FiCheckCircle}
-          trend={{ value: 8, label: "from last week", isPositive: true }}
         />
       </div>
 

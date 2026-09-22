@@ -34,7 +34,13 @@ export async function POST(request) {
         
         // append this new deployment in the users deployments
         await User.findByIdAndUpdate(creatorId, {
-            $push: { deployments: newDeployment._id }
+            $push: { 
+                deployments: newDeployment._id,
+                activity: {
+                    type: "project_created",
+                    description: `${projectName} deployment created successfully`
+                }
+            }
         })
         console.log("appended deployment")
         
